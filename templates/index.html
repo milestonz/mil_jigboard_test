@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국방 JIG 보드 테스트 프로그램</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">홈</a>
+        <a href="/engine_control">엔진조정기</a>
+        <a href="#relay">계전기모듈</a>
+        <div class="dropdown">
+            <button class="dropbtn">교류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">교류전압 테스트1</a>
+                <a href="#dc-stability">교류전압 테스트2</a>
+                <a href="#dc-ripple">교류전압 테스트2</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">직류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">전압조절범위시험</a>
+                <a href="#dc-stability">전압안정시험</a>
+                <a href="#dc-ripple">리플시험</a>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding:20px;">
+        <h2>국방 JIG 보드 테스트 프로그램</h2>
+        <p>메뉴를 선택하여 원하는 테스트를 진행하세요.</p>
+    </div>
+</body>
+</html>

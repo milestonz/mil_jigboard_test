@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엔진 제어 인터페이스</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">홈</a>
+        <a href="/engine_control">엔진조정기</a>
+        <a href="#relay">계전기모듈</a>
+        <div class="dropdown">
+            <button class="dropbtn">교류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">교류전압 테스트1</a>
+                <a href="#dc-stability">교류전압 테스트2</a>
+                <a href="#dc-ripple">교류전압 테스트2</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">직류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">전압조절범위시험</a>
+                <a href="#dc-stability">전압안정시험</a>
+                <a href="#dc-ripple">리플시험</a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h1>입력 상태 정보</h1>
+        <div class="row">
+            <button id="startBtn">START</button>
+        </div>
+        <div class="row">
+            <label for="inputVoltage">입력 전압:</label>
+            <input type="text" id="inputVoltage" readonly> V
+        </div>
+        <div class="row">
+            <label for="vccPlus">VCC+:</label>
+            <input type="text" id="vccPlus" readonly> V
+        </div>
+        <div class="row">
+            <label for="vccMinus">VCC-:</label>
+            <input type="text" id="vccMinus" readonly> V
+        </div>
+
+        <h1>LED 제어 (COM14, 115200 baud)</h1>
+        <div class="row">
+            <button id="ledOnBtn">LED ON</button>
+            <button id="ledOffBtn">LED OFF</button>
+        </div>
+        <div id="ledStatus"></div>
+        
+        <h1>출력 상태 정보</h1>
+        <div class="row">
+            <span>속도 표시 LAMP</span>
+        </div>
+        <div class="row">
+            <div>
+                <span id="lamp2" class="lamp lamp-green"></span>
+                <span>2%</span>
+            </div>
+            <div>
+                <span id="lamp72" class="lamp lamp-green"></span>
+                <span>72%</span>
+            </div>
+            <div>
+                <span id="lamp100" class="lamp lamp-red"></span>
+                <span>100%</span>
+            </div>
+            <div>
+                <span id="lampOS" class="lamp lamp-green"></span>
+                <span>O.S.</span>
+            </div>
+        </div>
+        <div class="row">
+            <label for="frequency">측정 주파수:</label>
+            <input type="text" id="frequency" readonly> Hz
+        </div>
+        <div class="row">
+            <span>OVER TEMP LAMP</span>
+            <span id="overTempLamp" class="lamp lamp-green"></span>
+        </div>
+        <div class="row">
+            <label for="temperature">측정 온도:</label>
+            <input type="text" id="temperature" readonly> °C
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/engine_control_scripts.js') }}"></script>
+</body>
+</html>
