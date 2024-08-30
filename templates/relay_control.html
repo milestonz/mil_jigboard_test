@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엔진 제어 인터페이스</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
+        .lamp { width: 20px; height: 20px; border-radius: 50%; display: inline-block; }
+        .lamp-on { background-color: #00ff00; }
+        .lamp-off { background-color: #cccccc; }
+        .switch-panel, .relay-panel { display: flex; flex-wrap: wrap; }
+        .switch, .relay { margin: 5px; text-align: center; }
+        .pcb-images { display: flex; justify-content: space-between; }
+        .pcb-images img { width: 30%; }
+
+        .start-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff5555, #cc0000);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .start-button.active {
+            background: white;
+            color: red;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .switch-label {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">홈</a>
+        <a href="/engine_control">엔진조정기</a>
+        <a href="/relay_control">계전기모듈</a>
+        <div class="dropdown">
+            <button class="dropbtn">교류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">교류전압 테스트1</a>
+                <a href="#dc-stability">교류전압 테스트2</a>
+                <a href="#dc-ripple">교류전압 테스트2</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">직류전압조정기
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="#dc-range">전압조절범위시험</a>
+                <a href="#dc-stability">전압안정시험</a>
+                <a href="#dc-ripple">리플시험</a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h1>검사 방법 설정</h1>
+        <div class="row">
+            <button id="startButton" class="start-button">START</button>
+            <div class="toggle-container">
+                <span class="switch-label">수동검사</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="testModeSwitch">
+                    <span class="slider"></span>
+                </label>
+                <span class="switch-label">자동검사</span>
+            </div>
+            <div>
+                <span>시험 조서: 33</span>
+                <span>지침 시간(초): 20</span>
+            </div>
+        </div>
+
+        <h2>스위치 설정 상태 LAMP</h2>
+        <div class="switch-panel">
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW1</div></div>
+            <div class="switch"><div class="lamp lamp-off"></div><div>SW2</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW3</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW4</div></div>
+            <div class="switch"><div class="lamp lamp-off"></div><div>SW5</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW6</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW7</div></div>
+            <div class="switch"><div class="lamp lamp-off"></div><div>SW8</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW9</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW10</div></div>
+            <div class="switch"><div class="lamp lamp-off"></div><div>SW11</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW12</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW13</div></div>
+            <div class="switch"><div class="lamp lamp-off"></div><div>SW14</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW15</div></div>
+            <div class="switch"><div class="lamp lamp-on"></div><div>SW16</div></div>
+        </div>
+
+        <h2>릴레이 동작 상태 LAMP</h2>
+        <div class="relay-panel">
+            <div class="relay"><div class="lamp lamp-off"></div><div>L1</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L2</div></div>
+            <!-- L3 to L22 -->
+            <div class="relay"><div class="lamp lamp-off"></div><div>L22</div></div>
+        </div>
+
+        <div class="pcb-images">
+            <img src="/static/images/pcb-1.jpg" alt="PCB Layout 1">
+            <img src="/static/images/pcb-2.jpg" alt="PCB Layout 2">
+            <img src="/static/images/pcb-3.jpg" alt="PCB Schematic">
+        </div>
+
+        <h2>출력 릴레이 표시</h2>
+        <div class="row">
+            <span>K1 K2 K3 K4 K5 K6 K7 K8 K9 K10 K11 K12 K13 K14 K15 K16 K17 K18 K19 K20</span>
+        </div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        let isActive = false;
+
+        startButton.addEventListener('click', function() {
+            isActive = !isActive;
+            if (isActive) {
+                this.classList.add('active');
+                this.textContent = '작동중';
+            } else {
+                this.classList.remove('active');
+                this.textContent = 'START';
+            }
+        });
+
+        document.getElementById('testModeSwitch').addEventListener('change', function() {
+            console.log(this.checked ? '자동검사 모드' : '수동검사 모드');
+        });
+    </script>
+</body>
+</html>

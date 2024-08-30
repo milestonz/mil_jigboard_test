@@ -51,6 +51,10 @@ def home():
 def engine_control():
     return render_template('engine_control.html')
 
+@app.route('/relay_control')
+def relay_control():
+    return render_template('relay_control.html')
+
 @app.route('/led_control', methods=['POST'])
 def led_control():
     if ser is None:
