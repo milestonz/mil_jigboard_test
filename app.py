@@ -55,6 +55,22 @@ def engine_control():
 def relay_control():
     return render_template('relay_control.html')
 
+@app.route('/ac_control')
+def ac_control():
+    return render_template('ac_control.html')
+
+@app.route('/dc_control')
+def dc_control():
+    return render_template('dc_control.html')
+
+@app.route('/update_data')
+def update_data():
+       # 여기에 데이터를 생성하거나 가져오는 로직을 구현
+       data = {
+           # ... 기타 필요한 데이터 ...
+       }
+       return jsonify(data)
+
 @app.route('/led_control', methods=['POST'])
 def led_control():
     if ser is None:

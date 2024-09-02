@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교류전압조정기 제어 인터페이스</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+        }
+        .navbar a {
+            float: left;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            padding: 20px;
+        }
+        .column {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .test-area {
+            display: flex;
+            gap: 20px;
+        }
+        .test-column {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .output-status {
+            grid-column: 1 / span 2;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .menu-item, #conditionList li {
+            padding: 6px;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .menu-item:hover:not(.active), #conditionList li:hover:not(.active) {
+            background-color: #e0e0e0;
+        }
+        .menu-item.active, #conditionList li.active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        #conditionList {
+            list-style-type: none;
+            padding: 0;
+        }
+        .lamp { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            display: inline-block; 
+        }
+        .lamp-on { background-color: #00ff00; }
+        .lamp-off { background-color: #cccccc; }
+        .output-status-lamp {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .lamp-container {
+            flex: 1;
+            text-align: center;
+            max-width: 100px;
+        }
+        .data-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 5px 0; 
+        }
+        .data-item { 
+            background-color: yellow; 
+            padding: 5px; 
+            flex: 1; 
+            margin: 0 5px; 
+        }
+        .data-value { 
+            background-color: black; 
+            color: red; 
+            padding: 2px 5px; 
+        }
+        .start-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: red;
+            color: white;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .gauges-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        .gauge-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .gauge {
+            flex: 0 0 auto;
+            width: 150px;
+            margin: 0 10px;
+        }
+        .gauge svg {
+            width: 100%;
+            height: auto;
+        }
+        .needle {
+            transform-origin: 75px 75px;
+            transition: transform 0.3s ease-out;
+        }
+        .gauge-fill {
+            transition: stroke-dasharray 0.3s ease-out;
+        }
+        .tick {
+            font-size: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">홈</a>
+        <a href="/engine_control">엔진조정기</a>
+        <a href="/relay_control">계전기모듈</a>
+        <a href="{{ url_for('ac_control') }}">교류전압조정기</a>
+        <a href="#dc-control">직류전압조정기</a>
+    </div>
+    <div class="main-container">
+        <div class="test-area">
+            <div class="test-column">
+                <h2>시험 항목</h2>
+                <div id="testItems"></div>
+            </div>
+            <div class="test-column">
+                <h2>시험 조건</h2>
+                <ul id="conditionList"></ul>
+            </div>
+        </div>
+        <div class="column">
+            <h2>입력 상태 정보</h2>
+            <div class="data-row">
+                <div class="data-item">주파수 입력: <span class="data-value" id="frequency">0.0</span> Hz</div>
+                <div class="data-item">3상입력전압 AC: <span class="data-value" id="acVoltage">0.0</span> V</div>
+            </div>
+            <div class="data-row">
+                <div class="data-item">부하 입력: <span class="data-value" id="inputCurrent">0.0</span> A</div>
+                <div class="data-item">외부전압: <span class="data-value" id="outputVoltage">0.0</span> V</div>
+            </div>
+            <div class="data-row">
+                <div class="data-item">엔진 부하1: <span class="data-value" id="engineCurrent1">0.0</span> A</div>
+                <div class="data-item">엔진 부하 2: <span class="data-value" id="engineCurrent2">0.0</span> A</div>
+            </div>
+            <div class="data-row">
+                <div class="data-item">CRASH 스위치: <span class="switch" id="crashSwitch">ON/OFF</span></div>
+                <div class="data-item">A상 단락 스위치: <span class="switch" id="aSwitch">ON/OFF</span></div>
+            </div>
+            <div class="data-row">
+                <div class="data-item">고장 자동해제 스위치: <span class="switch" id="faultReset">ON/OFF</span></div>
+                <div class="data-item">B상 단락 스위치: <span class="switch" id="bSwitch">ON/OFF</span></div>
+            </div>
+            <div class="data-row">
+                <div class="data-item">DC 전압출력기: <span class="data-value" id="dcVoltage">0.0</span> V</div>
+                <div class="data-item">AC 전원출력기: <span class="data-value" id="acPower">0.0</span> V</div>
+            </div>
+        </div>
+        <div class="output-status">
+            <h2>출력 상태 정보</h2>
+            <div class="output-status-lamp">
+                <div class="lamp-container"> 
+                    <div class="lamp" id="commLamp">
+                        <div class="lamp lamp-on"></div>
+                        <div>통신상태</div>
+                    </div>
+                </div>
+                <div class="lamp-container">
+                    <div class="lamp" id="faultLamp">
+                        <div class="lamp lamp-off"></div>
+                        <div>고장상태</div>
+                    </div>
+                </div>
+                <div class="lamp-container">
+                    <div class="lamp" id="operationLamp">
+                        <div class="lamp lamp-off"></div>
+                        <div>동작상태</div>
+                    </div>
+                </div>
+                <div class="lamp-container">
+                    <div class="lamp" id="readyLamp">
+                        <div class="lamp lamp-on"></div>
+                        <div>계자상태</div>
+                    </div>
+                </div>
+            </div>
+            <div class="gauges-container">
+                <div class="gauge-row">
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-1" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-1" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-1" font-size="7">0.0V</text>
+                            <g class="ticks ticks-1"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">출력전압(DC)</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-2" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-2" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-2" font-size="7">0.0A</text>
+                            <g class="ticks ticks-2"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">부하(Amp)</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-3" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-3" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-3" font-size="7">0.0V</text>
+                            <g class="ticks ticks-3"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">A상 출력전압</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-4" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-4" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-4" font-size="7">0.0V</text>
+                            <g class="ticks ticks-4"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">B상 출력전압</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-5" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-5" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-5" font-size="7">0.0V</text>
+                            <g class="ticks ticks-5"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">C상 출력전압</div>
+                    </div>
+                </div>
+                <div class="gauge-row">
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-6" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-6" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-6" font-size="7">0.0V</text>
+                            <g class="ticks ticks-6"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">출력전압(AC)</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-7" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-7" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-7" font-size="7">0.0V</text>
+                            <g class="ticks ticks-7"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">순시변동률</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-8" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-8" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-8" font-size="7">0.0V</text>
+                            <g class="ticks ticks-8"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">과도전압</div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 150 90">
+                            <path d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#eee" stroke-width="10"/>
+                            <path class="gauge-fill gauge-fill-9" d="M15 75 A 60 60 0 0 1 135 75" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="0 188.4"/>
+                            <line class="needle needle-9" x1="75" y1="75" x2="75" y2="20" stroke="red" stroke-width="1" transform="rotate(-90, 75, 75)"/>
+                            <circle cx="75" cy="75" r="2.5" fill="black"/>
+                            <text x="75" y="85" text-anchor="middle" class="gauge-value gauge-value-9" font-size="7">0.0V</text>
+                            <g class="ticks ticks-9"></g>
+                        </svg>
+                        <div style="text-align: center; margin-top: 5px;">엔진부하</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="startButton" class="start-button">START</button>
+
+    <script>
+        const testItems = [
+            "전압조정 및 제어 시험",
+            "무부하 계자리셋 시험",
+            "과부하 시험",
+            "과도상태 시험",
+            "단락 시험",
+            "안정도 및 전압조정범위 시험"
+        ];
+
+        const testConditions = {
+            "전압조정 및 제어 시험": [
+                "상전압 118V, 무부하시 출력상 전압",
+                "상전압 118V, 25KVA 부하시 출력상전압"
+            ],
+            "무부하 계자리셋 시험": [
+                "CRASH 스위치 OFF 후 ON"
+            ],
+            "과부하 시험": [
+                "과부하(27KVA)인가시 출력상전압"
+            ],
+            "과도상태 시험": [
+                "부하 17KVA 인가전압",
+                "부하 27KVA 인가전압",
+                "부하 0KVA 인경전압",
+                "부하 17KVA 인가전압"
+            ],
+            "단락 시험": [
+                "A상 단락시 B 및 C상전압",
+                "B상 단락시 A상 C상",
+                "A상, B상 단락시 C상전압"
+            ],
+            "안정도 및 전압조정범위 시험": [
+                "상전압 110V 설정시 / 무부하시 출력상전압",
+                "상전압 120V 설정시 / 25KVA부하시 출력상전압",
+                "상전압 120V 설정시 / 무부하시 출력상전압",
+                "상전압 120V 설정시 / 25KVA 부하시 출력상전압"
+            ]
+        };
+
+        function createTestItems() {
+            const testItemsContainer = document.getElementById('testItems');
+            testItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.textContent = item;
+                div.onclick = () => selectTestItem(div);
+                testItemsContainer.appendChild(div);
+            });
+        }
+
+        function selectTestItem(selectedElement) {
+            const testItemElements = document.querySelectorAll('.menu-item');
+            testItemElements.forEach(element => {
+                if (element === selectedElement) {
+                    element.classList.add('active');
+                } else {
+                    element.classList.remove('active');
+                }
+            });
+            showConditions(selectedElement.textContent);
+        }
+
+        function showConditions(item) {
+            const conditionList = document.getElementById('conditionList');
+            conditionList.innerHTML = '';
+            if (testConditions[item]) {
+                testConditions[item].forEach(condition => {
+                    const li = document.createElement('li');
+                    li.textContent = condition;
+                    li.onclick = () => toggleConditionActive(li);
+                    conditionList.appendChild(li);
+                });
+            }
+        }
+
+        function toggleConditionActive(element) {
+            const conditions = document.querySelectorAll('#conditionList li');
+            conditions.forEach(cond => {
+                if (cond === element) {
+                    cond.classList.toggle('active');
+                } else {
+                    cond.classList.remove('active');
+                }
+            });
+        }
+
+// ============================
+        function updateData() {
+            fetch('/update_data')
+                .then(response => response.json())
+                .then(data => {
+                    // ... 데이터 업데이트 로직 ...
+                });
+        }
+
+        function updateLamp(id, isOn) {
+            const lamp = document.getElementById(id);
+            lamp.style.backgroundColor = isOn ? 'green' : 'red';
+            lamp.classList.toggle('lamp-on', isOn);
+        }
+
+        const startButton = document.getElementById('startButton');
+        let isActive = false;
+
+        startButton.addEventListener('click', function() {
+            isActive = !isActive;
+            if (isActive) {
+                this.classList.add('active');
+                this.textContent = '작동중';
+            } else {
+                this.classList.remove('active');
+                this.textContent = 'START';
+            }
+        });
+
+        createTestItems();
+        setInterval(updateData, 1000);
+
+        function createTicks() {
+            for (let i = 1; i <= 9; i++) {
+                let maxValue, unit;
+                switch(i) {
+                    case 2:
+                        maxValue = 4000;
+                        unit = 'A';
+                        break;
+                    case 7:
+                        maxValue = 10;
+                        unit = '%';
+                        break;
+                    case 8:
+                        maxValue = 250;
+                        unit = 'V';
+                        break;
+                    case 9:
+                        maxValue = 100;
+                        unit = '%';
+                        break;
+                    default:
+                        maxValue = 220;
+                        unit = 'V';
+                }
+                createTicksForGauge(`.ticks-${i}`, maxValue, unit);
+            }
+        }
+
+        function createTicksForGauge(selector, maxValue, unit) {
+            const ticks = document.querySelector(selector);
+            for (let i = 0; i <= maxValue; i += maxValue / 11) {
+                const angle = i * (180 / maxValue);
+                const x1 = 75 + 55 * Math.cos((angle + 180) * Math.PI / 180);
+                const y1 = 75 + 55 * Math.sin((angle + 180) * Math.PI / 180);
+                const x2 = 75 + 60 * Math.cos((angle + 180) * Math.PI / 180);
+                const y2 = 75 + 60 * Math.sin((angle + 180) * Math.PI / 180);
+                const labelX = 75 + 65 * Math.cos((angle + 180) * Math.PI / 180);
+                const labelY = 75 + 65 * Math.sin((angle + 180) * Math.PI / 180);
+                
+                ticks.innerHTML += `
+                    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="black" stroke-width="0.5"/>
+                    <text x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="middle" class="tick">${i.toFixed(0)}${unit}</text>
+                `;
+            }
+        }
+
+        function setGaugeValue(voltage, index, maxValue, unit) {
+            const percentage = voltage / maxValue;
+            const degrees = percentage * 180 - 90;
+
+            const needle = document.querySelector(`.needle-${index}`);
+            needle.style.transform = `rotate(${degrees}deg)`;
+
+            const gaugeFill = document.querySelector(`.gauge-fill-${index}`);
+            const circumference = 2 * Math.PI * 60;
+            const fillLength = circumference * percentage / 2;
+            gaugeFill.style.strokeDasharray = `${fillLength} ${circumference - fillLength}`;
+
+            const gaugeValue = document.querySelector(`.gauge-value-${index}`);
+            gaugeValue.textContent = voltage.toFixed(1) + unit;
+        }
+
+        function testGauges() {
+            const voltages = [0, 110, 200, 105, 100, 220, 210, 220, 105, 100, 220, 210, 220];
+            const burdens = [0, 1234, 903, 864, 3456];
+            const aPhaseVoltages = [0, 120, 180, 90, 150, 200, 110, 190, 100, 170, 210, 130, 220];
+            const bPhaseVoltages = [0, 100, 190, 80, 160, 210, 120, 200, 110, 180, 220, 140, 210];
+            const cPhaseVoltages = [0, 130, 170, 95, 140, 190, 105, 180, 115, 160, 200, 120, 215];
+            const acVoltages = [0, 220, 180, 200, 210, 190, 205, 215, 195, 220, 200, 210, 220];
+            const instantVariations = [0, 5, 10, 3, 7, 2, 8, 4, 6, 1, 9, 3, 5];
+            const transientVoltages = [0, 240, 200, 230, 210, 250, 220, 235, 205, 245, 215, 225, 230];
+            const engineLoads = [0, 50, 75, 60, 80, 40, 70, 55, 85, 45, 65, 90, 75];
+            let index = 0;
+            
+            function updateGauges() {
+                if (index < voltages.length) {
+                    setGaugeValue(voltages[index], 1, 220, 'V');
+                    setGaugeValue(burdens[index % burdens.length], 2, 4000, 'A');
+                    setGaugeValue(aPhaseVoltages[index], 3, 220, 'V');
+                    setGaugeValue(bPhaseVoltages[index], 4, 220, 'V');
+                    setGaugeValue(cPhaseVoltages[index], 5, 220, 'V');
+                    setGaugeValue(acVoltages[index], 6, 220, 'V');
+                    setGaugeValue(instantVariations[index], 7, 10, '%');
+                    setGaugeValue(transientVoltages[index], 8, 250, 'V');
+                    setGaugeValue(engineLoads[index], 9, 100, '%');
+                    index++;
+                    setTimeout(updateGauges, 1000);
+                }
+            }
+            
+            updateGauges();
+        }
+        window.onload = function() {
+            createTicks();
+            setGaugeValue(0, 1, 220, 'V');
+            setGaugeValue(0, 2, 4000, 'A');
+            setGaugeValue(0, 3, 220, 'V');
+            setGaugeValue(0, 4, 220, 'V');
+            setGaugeValue(0, 5, 220, 'V');
+            setGaugeValue(0, 6, 220, 'V');
+            setGaugeValue(0, 7, 10, '%');
+            setGaugeValue(0, 8, 250, 'V');
+            setGaugeValue(0, 9, 100, '%');
+            setTimeout(testGauges, 1000);
+        };
+    </script>
+</body>
+</html>

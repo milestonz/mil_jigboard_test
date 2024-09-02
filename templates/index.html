@@ -5,22 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>국방 JIG 보드 테스트 프로그램</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
     <div class="navbar">
         <a href="/">홈</a>
         <a href="/engine_control">엔진조정기</a>
         <a href="/relay_control">계전기모듈</a>
-        <div class="dropdown">
+        <a href="/ac_control">교류전압조정기</a>
+        <!-- <div class="dropdown">
             <button class="dropbtn">교류전압조정기
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="#dc-range">교류전압 테스트1</a>
-                <a href="#dc-stability">교류전압 테스트2</a>
-                <a href="#dc-ripple">교류전압 테스트2</a>
+                <a href="#dropdown-a">전압조정 및 제어시험</a>
+                <a href="#dropdown-b">무부하계자 리셋시험</a>
+                <a href="#dropdown-c">과부하 시험</a>
+                <a href="#dropdown-d">과도상태 시험</a>
+                <a href="#dropdown-e">단락 시험</a>
+                <a href="#dropdown-f">안정도 및 전압조정범위 시험</a>
             </div>
-        </div>
+        </div> -->
         <div class="dropdown">
             <button class="dropbtn">직류전압조정기
                 <i class="fa fa-caret-down"></i>
@@ -37,5 +42,6 @@
         <h2>국방 JIG 보드 테스트 프로그램</h2>
         <p>메뉴를 선택하여 원하는 테스트를 진행하세요.</p>
     </div>
+    <script src="{{ url_for('static', filename='js/ac_control.js') }}"></script>
 </body>
 </html>

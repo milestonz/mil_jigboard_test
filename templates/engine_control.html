@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>엔진 제어 인터페이스</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .lamp {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        background-color: #ccc;
+        }
+
+        .lamp.green {
+            background-color: green;
+        }
+
+        .lamp.red {
+            background-color: red;
+        }
+        </style>
 </head>
 <body>
     <div class="navbar">
@@ -16,9 +34,12 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="#dc-range">교류전압 테스트1</a>
-                <a href="#dc-stability">교류전압 테스트2</a>
-                <a href="#dc-ripple">교류전압 테스트2</a>
+                <a href="#dropdown-a">전압조정 및 제어시험</a>
+                <a href="#dropdown-b">무부하계자 리셋시험</a>
+                <a href="#dropdown-c">과부하 시험</a>
+                <a href="#dropdown-d">과도상태 시험</a>
+                <a href="#dropdown-e">단락 시험</a>
+                <a href="#dropdown-f">안정도 및 전압조정범위 시험</a>
             </div>
         </div>
         <div class="dropdown">
@@ -63,19 +84,19 @@
         </div>
         <div class="row">
             <div>
-                <span id="lamp2" class="lamp lamp-green"></span>
+                <span id="lamp2" class="lamp lamp.green"></span>
                 <span>2%</span>
             </div>
             <div>
-                <span id="lamp72" class="lamp lamp-green"></span>
+                <span id="lamp72" class="lamp lamp.green"></span>
                 <span>72%</span>
             </div>
             <div>
-                <span id="lamp100" class="lamp lamp-red"></span>
+                <span id="lamp100" class="lamp lamp.red"></span>
                 <span>100%</span>
             </div>
             <div>
-                <span id="lampOS" class="lamp lamp-green"></span>
+                <span id="lampOS" class="lamp lamp.green"></span>
                 <span>O.S.</span>
             </div>
         </div>
@@ -85,7 +106,7 @@
         </div>
         <div class="row">
             <span>OVER TEMP LAMP</span>
-            <span id="overTempLamp" class="lamp lamp-green"></span>
+            <span id="overTempLamp" class="lamp lamp.green"></span>
         </div>
         <div class="row">
             <label for="temperature">측정 온도:</label>

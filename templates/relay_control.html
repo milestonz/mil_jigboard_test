@@ -94,16 +94,20 @@
         <a href="/">홈</a>
         <a href="/engine_control">엔진조정기</a>
         <a href="/relay_control">계전기모듈</a>
-        <div class="dropdown">
+        <a href="{{ url_for('ac_control') }}">교류전압조정기</a>
+        <!-- <div class="dropdown">
             <button class="dropbtn">교류전압조정기
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="#dc-range">교류전압 테스트1</a>
-                <a href="#dc-stability">교류전압 테스트2</a>
-                <a href="#dc-ripple">교류전압 테스트2</a>
+                <a href="#dropdown-a">전압조정 및 제어시험</a>
+                <a href="#dropdown-b">무부하계자 리셋시험</a>
+                <a href="#dropdown-c">과부하 시험</a>
+                <a href="#dropdown-d">과도상태 시험</a>
+                <a href="#dropdown-e">단락 시험</a>
+                <a href="#dropdown-f">안정도 및 전압조정범위 시험</a>
             </div>
-        </div>
+        </div> -->
         <div class="dropdown">
             <button class="dropbtn">직류전압조정기
                 <i class="fa fa-caret-down"></i>
@@ -157,7 +161,25 @@
         <div class="relay-panel">
             <div class="relay"><div class="lamp lamp-off"></div><div>L1</div></div>
             <div class="relay"><div class="lamp lamp-off"></div><div>L2</div></div>
-            <!-- L3 to L22 -->
+            <div class="relay"><div class="lamp lamp-off"></div><div>L3</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L4</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L5</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L6</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L7</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L8</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L9</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L10</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L11</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L12</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L13</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L14</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L15</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L16</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L17</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L18</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L19</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L20</div></div>
+            <div class="relay"><div class="lamp lamp-off"></div><div>L21</div></div>
             <div class="relay"><div class="lamp lamp-off"></div><div>L22</div></div>
         </div>
 
